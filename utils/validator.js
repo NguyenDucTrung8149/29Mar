@@ -1,6 +1,8 @@
 let { body, validationResult } = require('express-validator')
 let constants = require('./constants')
 let util = require('util')
+let { CreateErrorResponse } = require('../utils/responseHandler')
+const { CONNREFUSED } = require('dns')
 
 let options = {
     password: {
@@ -14,7 +16,7 @@ let options = {
         minLength: 6
     },
     fullname: {
-        maxLength: 50
+        maxLength: 20
     },
     avatarUrl: {
         isUrl: true
@@ -39,15 +41,19 @@ module.exports = {
             options.password.minNumbers,
             options.password.minSymbols)),
         body("email").isEmail().withMessage(constants.VALIDATOR_ERROR_EMAIL),
-        body("fullname").isLength({ max: options.fullname.maxLength }).withMessage(`Fullname không được dài quá ${options.fullname.maxLength} ký tự`),
-        body("avatarUrl").isURL().withMessage("AvatarUrl phải là một URL hợp lệ")
+        body("fullname").isLength(options.fullname).withMessage(util.format(constants.VALIDATOR_ERROR_FULLNAME, options.fullname.maxLength)),
     ],
     LoginValidator: [
         body("username").isLength(options.username).withMessage("username hoac password sai"),
         body("password").isStrongPassword(options.password).withMessage("username hoac password sai")
     ],
     ChangePasswordValidator: [
-        body("oldpassword").isStrongPassword(options.password).withMessage("Mật khẩu cũ không đúng định dạng"),
+        body("oldpassword").isStrongPassword(options.password).withMessage(util.format(constants.VALIDATOR_ERROR_PASSWORD,
+            options.password.minLength,
+            options.password.minLowercase,
+            options.password.minUppercase,
+            options.password.minNumbers,
+            options.password.minSymbols)),
         body("newpassword").isStrongPassword(options.password).withMessage(util.format(constants.VALIDATOR_ERROR_PASSWORD,
             options.password.minLength,
             options.password.minLowercase,
@@ -75,8 +81,7 @@ module.exports = {
             options.password.minNumbers,
             options.password.minSymbols)),
         body("email").isEmail().withMessage(constants.VALIDATOR_ERROR_EMAIL),
-        body("fullname").isLength({ max: options.fullname.maxLength }).withMessage(`Fullname không được dài quá ${options.fullname.maxLength} ký tự`),
-        body("avatarUrl").isURL().withMessage("AvatarUrl phải là một URL hợp lệ"),
+        body("fullname").isLength(options.fullname).withMessage(util.format(constants.VALIDATOR_ERROR_FULLNAME, options.fullname.maxLength)),
     ],
     UpdateUserValidator: [
         body("username").isLength(options.username).withMessage(util.format(constants.VALIDATOR_ERROR_USERNAME, options.username.minLength)),
@@ -87,7 +92,6 @@ module.exports = {
             options.password.minNumbers,
             options.password.minSymbols)),
         body("email").isEmail().withMessage(constants.VALIDATOR_ERROR_EMAIL),
-        body("fullname").isLength({ max: options.fullname.maxLength }).withMessage(`Fullname không được dài quá ${options.fullname.maxLength} ký tự`),
-        body("avatarUrl").isURL().withMessage("AvatarUrl phải là một URL hợp lệ"),
+        body("fullname").isLength(options.fullname).withMessage(util.format(constants.VALIDATOR_ERROR_FULLNAME, options.fullname.maxLength)),
     ]
 }

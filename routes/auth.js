@@ -15,7 +15,7 @@ router.post('/signup', SignUpValidator, validate, async function (req, res, next
             req.body.username,
             req.body.password,
             req.body.email,
-            'user',
+            'USER',
             req.body.fullname,
             req.body.avatarUrl
         )

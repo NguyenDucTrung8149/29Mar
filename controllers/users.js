@@ -10,15 +10,15 @@ module.exports = {
   },
   GetUserByEmail: async function (email) {
     return await userSchema.findOne({
-      email:email
+      email: email
     }).populate('role')
   },
   GetUserByToken: async function (token) {
     return await userSchema.findOne({
-      resetPasswordToken:token
+      resetPasswordToken: token
     }).populate('role')
   },
-  CreateAnUser: async function (username, password, email, role) {
+  CreateAnUser: async function (username, password, email, role, fullname) {
     try {
       let roleObj = await roleSchema.findOne({
         name: role
@@ -28,7 +28,8 @@ module.exports = {
           username: username,
           password: password,
           email: email,
-          role: roleObj._id
+          role: roleObj._id,
+          fullname: fullname,
         })
         return await newUser.save();
       } else {
@@ -70,11 +71,11 @@ module.exports = {
   },
   Change_Password: async function (user, oldpassword, newpassword) {
     if (bcrypt.compareSync(oldpassword, user.password)) {
-        //doit pass
-        user.password = newpassword;
-        await user.save();
+      //doit pass
+      user.password = newpassword;
+      await user.save();
     }
-    else{
+    else {
       throw new Error("oldpassword khong dung")
     }
   }
